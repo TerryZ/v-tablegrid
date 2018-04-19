@@ -75,7 +75,7 @@
              */
             dataLoad: false,
             /**
-             * using server side data to update table
+             * update data to table
              * @param values - server side return data
              */
             serverSideDataSet(values){
@@ -92,22 +92,27 @@
              */
             populate(){
                 let that = this, params = {};
-                //sort parameters set
-                if(this.config.pSorting && this.sortColumn){
-                    params.sortName = this.sortColumn;
-                    params.sortOrder = this.sortOrder ? this.sortOrder : con.orderAsc;
+                if(typeof(this.config.data) === 'string'){
+                    //sort parameters set
+                    if(this.config.pSorting && this.sortColumn){
+                        params.sortName = this.sortColumn;
+                        params.sortOrder = this.sortOrder ? this.sortOrder : con.orderAsc;
+                    }
+                    //page parameters set
+                    if(this.pageNumber !== -1) params.pageNumber = this.pageNumber;
+                    if(this.pageSize !== -1) params.pageSize = this.pageSize;
+
+                    if(this.queryParams && Object.keys(this.queryParams).length)
+                        params = Object.assign({}, params, this.queryParams);
+
+                    if(this.dataLoad)
+                        this.dataLoad(this.config.data, params).then(function(values){
+                            that.serverSideDataSet(values);
+                        });
+                }else if(typeof(this.config.data) === 'object'){
+                    this.serverSideDataSet(this.config.data);
                 }
-                //page parameters set
-                if(this.pageNumber !== -1) params.pageNumber = this.pageNumber;
-                if(this.pageSize !== -1) params.pageSize = this.pageSize;
 
-                if(this.queryParams && Object.keys(this.queryParams).length)
-                    params = Object.assign({}, params, this.queryParams);
-
-                if(this.dataLoad)
-                    this.dataLoad(this.config.data, params).then(function(values){
-                        that.serverSideDataSet(values);
-                    });
             },
             /**
              * Column sort change
@@ -159,7 +164,7 @@
             }
         },
         mounted(){
-            this.populate();
+            if(!this.config.pPagination) this.populate();
         }
     }
 </script>
