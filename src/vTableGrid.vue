@@ -112,7 +112,8 @@
                     if(this.dataLoad)
                         this.dataLoad(this.config.data, params).then(function(values){
                             that.dataRender(values);
-                            that.setting.state.reload = false;
+                            if(typeof(that.setting.state)!=='undefined' && typeof(that.setting.state.reload)!=='undefined')
+                                that.setting.state.reload = false;
                         });
                 }else if(typeof(this.config.data) === 'object'){
                     this.dataRender(this.config.data);
