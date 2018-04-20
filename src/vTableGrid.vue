@@ -3,7 +3,7 @@
         <table class="table table-striped table-bordered vTableGrid">
             <thead v-show="config.pCheck !== false">
                 <tr>
-                    <th>选择</th>
+                    <th>Select</th>
                     <th v-for="col,index in config.columns"
                         @click="sortChange(col.data, index)"
                         :class="{
@@ -56,6 +56,11 @@
             }
         },
         watch:{
+            'setting.state.reload': function(val){
+                if(val){
+                    this.populate();
+                }
+            },
             'setting.params':{
                 handler(val){
                     this.queryParams = val;
@@ -78,11 +83,10 @@
              * update data to table
              * @param values - server side return data
              */
-            serverSideDataSet(values){
+            dataRender(values){
                 if(values &&
                     typeof(values.gridResult) !== 'undefined' &&
-                    typeof(values.gridResult.list) !== 'undefined' &&
-                    values.gridResult.list.length){
+                    typeof(values.gridResult.list) !== 'undefined'){
                     this.dataRows = values.gridResult.list;
                     this.pageSetting.totalRow = values.gridResult.totalRow;
                 }
@@ -107,15 +111,15 @@
 
                     if(this.dataLoad)
                         this.dataLoad(this.config.data, params).then(function(values){
-                            that.serverSideDataSet(values);
+                            that.dataRender(values);
+                            that.setting.state.reload = false;
                         });
                 }else if(typeof(this.config.data) === 'object'){
-                    this.serverSideDataSet(this.config.data);
+                    this.dataRender(this.config.data);
                 }
-
             },
             /**
-             * Column sort change
+             * Receive page switch and do request
              * @param pInfo - page switch info
              */
             pageChange(pInfo){
